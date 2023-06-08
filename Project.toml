@@ -3,6 +3,12 @@ uuid = "ac4f66ef-b55e-4c44-9df1-dd60b59bb5cd"
 authors = ["jay prakash <jayprakashdav20@gmail.com> and contributors"]
 version = "1.0.0-DEV"
 
+[deps]
+BEAST = "bb4162c7-ba94-5a20-af32-d8ec4428bdd1"
+CompScienceMeshes = "3e66a162-7b8c-5da0-b8f8-124ecd2c3ae1"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
 [compat]
 julia = "1"
 
