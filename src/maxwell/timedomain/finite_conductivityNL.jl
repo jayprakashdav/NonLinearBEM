@@ -417,8 +417,8 @@ function marchonintimenl4(eq1, eq2,  Z, inc, Ġ, G_j, G_nl, Nt)
         println(i)
         R = inc[:,i]
         ##do a clean implementation
-        g = BEAST.creategaussian(2.9504, 2.2128, 0.8)
-        R[end] = g(0.01844*i)
+        #= g = BEAST.creategaussian(2.9504, 2.2128, 0.8)
+        R[end] = g(0.01844*i) =#
 		fill!(yj,0)
 		fill!(ye,0)
 		BEAST.ConvolutionOperators.convolve!(yj,Z,xj,csxj,i,jk_start,jk_stop)
@@ -454,7 +454,7 @@ function marchonintimenl4(eq1, eq2,  Z, inc, Ġ, G_j, G_nl, Nt)
             #xe_all = hcat(xe_all, xe[:,i])
             #xj_all = hcat(xj_all, xj[:,i])
             println("norm xe ", norm(xe[:,i]-xeprev))
-            if norm(xe[:,i]-xeprev) < 1e-6
+            if norm(xe[:,i]-xeprev) < 1e-4
                 break
             end
         end

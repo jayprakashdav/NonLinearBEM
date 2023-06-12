@@ -136,10 +136,42 @@ NonLinearBEM.kernelvals(f::ConductivityTDop_b, mp, cell, cqdpt)
 
 function kernelvals(f::ConductivityTDop_b, mp, cell, cqdpt)
     ei = f.op.efield[cell, cqdpt]
+    marginl = 0.2
+    marginh = 1.0-marginl
+    xmp = mp.cart[1]
+    ymp = mp.cart[2]
+    #nearedge = false
+    r = sqrt(xmp^2+ymp^2)
+    λ = 1.0
+    #= 
+    if xmp < marginl
+        nearedge = true
+        #taper += 8.0*(marginl-xmp)
+    elseif xmp > marginh
+        nearedge = true
+        #taper += 8.0*(xmp-marginh)
+    end
+    if ymp < marginl
+        nearedge = true
+        #taper += 8.0*(marginl-ymp)
+    elseif ymp > marginh
+        nearedge = true
+        #taper += 8.0*(ymp-marginh)
+    end
+ =#
     if norm(ei)==0
         ei = 1e-9.+ei
     end
-    dsigma = f.op.dchr(norm(ei))*kron(ei, ei')/norm(ei)+f.op.chr(norm(ei))*I(3)
+    if r > marginl
+        if r > marginh
+            λ = 1.0
+        else
+            λ = (marginh-r)/(marginh-marginl)
+        end
+    end
+    #= println("not near edge")
+    println(mp.cart) =#
+    dsigma = λ*f.op.dchr(norm(ei))*kron(ei, ei')/norm(ei)+(λ*f.op.chr(norm(ei))+10.0*(1-λ))*I(3)
     return dsigma
 end
 
