@@ -73,7 +73,7 @@ function (f::ConductivityTD)(cell, cqdpt)
     return inv(dsigma)*fn
 end
 
-function (f::ConductivityTD_b)(cell, cqdpt)
+function (f::ConductivityTD_b)(cell, cqdpt, mp)
     ei = f.efield[cell, cqdpt]
     if norm(ei)==0
         ei = 1e-9.+ei
@@ -82,7 +82,22 @@ function (f::ConductivityTD_b)(cell, cqdpt)
     #= if cell ==1 && cqdpt==1
         println(ei)
     end =#
-    fn = f.chr(norm(ei))*ei
+    λ = 1.0
+    margin = 0.2
+    marginh = 0.5-margin
+    xmp = mp.cart[1]-0.5
+    ymp = mp.cart[2]-0.5
+    #nearedge = false
+    r = sqrt(xmp^2+ymp^2)
+    λ = 1.0
+    if r > marginh
+        if r > 0.5
+            λ = 0.0
+        else
+            λ = (r-marginh)/(margin)
+        end
+    end
+    fn = λ*f.chr(norm(ei))*ei
     return fn
 end
 
@@ -136,37 +151,21 @@ NonLinearBEM.kernelvals(f::ConductivityTDop_b, mp, cell, cqdpt)
 
 function kernelvals(f::ConductivityTDop_b, mp, cell, cqdpt)
     ei = f.op.efield[cell, cqdpt]
-    marginl = 0.2
-    marginh = 1.0-marginl
-    xmp = mp.cart[1]
-    ymp = mp.cart[2]
+    margin = 0.2
+    marginh = 0.5-margin
+    xmp = mp.cart[1]-0.5
+    ymp = mp.cart[2]-0.5
     #nearedge = false
     r = sqrt(xmp^2+ymp^2)
     λ = 1.0
-    #= 
-    if xmp < marginl
-        nearedge = true
-        #taper += 8.0*(marginl-xmp)
-    elseif xmp > marginh
-        nearedge = true
-        #taper += 8.0*(xmp-marginh)
-    end
-    if ymp < marginl
-        nearedge = true
-        #taper += 8.0*(marginl-ymp)
-    elseif ymp > marginh
-        nearedge = true
-        #taper += 8.0*(ymp-marginh)
-    end
- =#
     if norm(ei)==0
         ei = 1e-9.+ei
     end
-    if r > marginl
-        if r > marginh
-            λ = 1.0
+    if r > marginh
+        if r > 0.5
+            λ = 0.0
         else
-            λ = (marginh-r)/(marginh-marginl)
+            λ = (r-marginh)/(margin)
         end
     end
     #= println("not near edge")
@@ -325,7 +324,7 @@ function celltestvalues(tshs::BEAST.RefSpace{T, NF}, t, tcell, field::NonLinearB
 
         dx =qr[p].weight
 
-        fval = field(t,p)
+        fval = field(t,p,mp)
         tvals = qr[p].value
 
         for m in 1 : num_tshs
