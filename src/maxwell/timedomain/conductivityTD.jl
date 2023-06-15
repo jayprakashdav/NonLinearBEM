@@ -93,8 +93,8 @@ function (f::ConductivityTD_b)(cell, cqdpt, mp)
     if r > marginh
         if r > 0.5
             λ = 0.0
-        else
-            λ = (r-marginh)/(margin)
+        #= else
+            λ = (r-marginh)/(margin) =#
         end
     end
     fn = (λ*f.chr(norm(ei))+(1-λ)*10.0)*ei
@@ -164,8 +164,8 @@ function kernelvals(f::ConductivityTDop_b, mp, cell, cqdpt)
     if r > marginh
         if r > 0.5
             λ = 0.0
-        else
-            λ = (r-marginh)/(margin)
+        #= else
+            λ = (r-marginh)/(margin) =#
         end
     end
     #= println("not near edge")
