@@ -97,7 +97,7 @@ function (f::ConductivityTD_b)(cell, cqdpt, mp)
             λ = (r-marginh)/(margin)
         end
     end
-    fn = λ*f.chr(norm(ei))*ei
+    fn = (λ*f.chr(norm(ei))+(1-λ)*10.0)*ei
     return fn
 end
 
