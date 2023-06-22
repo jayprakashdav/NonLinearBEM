@@ -89,14 +89,14 @@ function (f::ConductivityTD_b)(cell, cqdpt, mp)
     ymp = mp.cart[2]-0.5
     #nearedge = false
     r = sqrt(xmp^2+ymp^2)
-    if r > marginh
+    #= if r > marginh
         if r > 0.5
             λ = 0.0
         else
             #λ = (r-marginh)/(margin)
             λ = 0.0
         end
-    end
+    end =#
     fn = (λ*f.chr(norm(ei))+(1-λ)*1.0)*ei
     return fn
 end
@@ -161,14 +161,14 @@ function kernelvals(f::ConductivityTDop_b, mp, cell, cqdpt)
     if norm(ei)==0
         ei = 1e-9.+ei
     end
-    if r > marginh
+    #= if r > marginh
         if r > 0.5
             λ = 0.0
         else
             #λ = (r-marginh)/(margin)
             λ = 0.0
         end
-    end
+    end =#
     #= println("not near edge")
     println(mp.cart) =#
     dsigma = λ*f.op.dchr(norm(ei))*kron(ei, ei')/norm(ei)+(λ*f.op.chr(norm(ei))+1.0*(1-λ))*I(3)
