@@ -18,12 +18,13 @@ export IdentityTime
 export NLConductivity
 export ConductivityTD
 export raviartthomaswithport
+export PortVolt
 
+include("bases/portvoltage.jl")
 include("maxwell/timedomain/finite_conductivity.jl")
 include("maxwell/timedomain/conductivityTD.jl")
 include("maxwell/timedomain/finite_conductivityNL.jl")
 include("bases/port_basis.jl")
-include("bases/portvoltage.jl")
 include("bases/test_gmsh.jl")
 
 end

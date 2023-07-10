@@ -101,6 +101,57 @@ function (f::ConductivityTD_b)(cell, cqdpt, mp)
     return fn
 end
 
+function (f::PortVolt)(r,t)
+    t = cartesian(t)[1]
+    f.pv1(t)*[1.0 1.0 1.0]
+end
+
+BEAST.assemble!(exc::PortVolt, testST, store;
+quaddata=quaddata, quadrule=quadrule) = NonLinearBEM.assemble!(exc::PortVolt, testST, store;
+quaddata=quaddata, quadrule=quadrule)
+
+function assemble!(exc::PortVolt, testST, store;
+    quaddata=quaddata, quadrule=quadrule)
+
+    testfns = spatialbasis(testST)
+    timefns = temporalbasis(testST)
+
+    testrefs = refspace(testfns)
+    timerefs = refspace(timefns)
+
+    testels, testad = assemblydata(testfns)
+    timeels, timead = assemblydata(timefns)
+
+    qd = quaddata(exc, testrefs, timerefs, testels, timeels)
+
+    z = zeros(eltype(exc), numfunctions(testrefs), numfunctions(timerefs))
+    for p in eachindex(testels)
+        τ = testels[p]
+        for r in eachindex(timeels)
+            ρ = timeels[r]
+
+            fill!(z, 0)
+            qr = quadrule(exc, testrefs, timerefs, p, τ, r, ρ, qd)
+            BEAST.momintegrals!(z, exc, testrefs, timerefs, τ, ρ, qr)
+
+            for i in 1 : numfunctions(testrefs)
+                for d in 1 : numfunctions(timerefs)
+
+                    v = z[i,d]
+                    for (m,a) in testad[p,i]
+                        for (k,c) in timead[r,d]
+                            if exc.ids[m]==4
+                                store(a*c*v, m, k)
+                            end
+                        end
+                    end
+
+                end
+            end
+        end
+    end
+end
+
 BEAST.integrand(::NonLinearBEM.ConductivityTD_model, gx, ϕx) = gx[1] ⋅ ϕx
 BEAST.defaultquadstrat(::NonLinearBEM.ConductivityTD_model, ::BEAST.LinearRefSpaceTriangle, ::BEAST.LinearRefSpaceTriangle) = BEAST.SingleNumQStrat(8)
 

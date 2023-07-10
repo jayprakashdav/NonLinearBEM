@@ -8,6 +8,8 @@ mutable struct PortVolt{T,P,P1,P2,F1,F2} <: TDFunctional{T}
     speedoflight::T
 end
 
+BEAST.scalartype(p::TDFunctional) = eltype(p.speedoflight)
+
 function portvoltage(mesh,port1,port2,v1,v2,ids)
     PortVolt(mesh,port1,port2,v1,v2,ids,1.0)
 end

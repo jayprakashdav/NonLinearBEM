@@ -1,7 +1,7 @@
 function raviartthomaswithport(mesh::CompScienceMeshes.AbstractMesh{U,D1,T}, portmesh::CompScienceMeshes.AbstractMesh{U,D2,T},direction) where {U,D1,D2,T}
 
     #determine the number of varying RWGs for port edges
-    eps = nlmodelling.edgepairs(portmesh,skeleton(portmesh,0))
+    eps = NonLinearBEM.edgepairs(portmesh,skeleton(portmesh,0))
     cps = CompScienceMeshes.cellpairs(mesh, portmesh) 
     numpairs = size(eps,2)
     numportedges = size(portmesh.faces,1)  
