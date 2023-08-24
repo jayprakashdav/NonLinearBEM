@@ -181,7 +181,7 @@ function tdsolve(eq1::BEAST.DiscreteEquation, eq2::BEAST.DiscreteEquation)
         if eq2.equation.rhs.terms[1].functional.initialcondition
             return marchonintimenl5(eq1, eq2, Z, b, Ġ, G_j, G_nl, Nt)
         else
-            return marchonintimenl4(eq1, eq2, Z, b, Ġ, G_j, G_nl, Nt)
+            return marchonintimenl7(eq1, eq2, Z, b, Ġ, G_j, G_nl, Nt)
         end
     end
     marchonintime(eq1, eq2, Z, b, Ġ, G_j, Nt)
