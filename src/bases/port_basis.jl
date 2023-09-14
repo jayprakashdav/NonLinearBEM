@@ -49,7 +49,7 @@ function raviartthomaswithport(mesh::CompScienceMeshes.AbstractMesh{U,D1,T}, por
                     break
                 end
             end
-            push!(functions[i],BEAST.Shape{T}(c1, abs(oppv1), T(direction*(0.05))))
+            push!(functions[i],BEAST.Shape{T}(c1, abs(oppv1), T(direction)))
             if j==1
                 temppos = cartesian(center(chart(mesh,c1)))
             else
@@ -73,23 +73,24 @@ function raviartthomaswithport(dev_mesh::CompScienceMeshes.AbstractMesh{U,D1,T},
     
     totalfns = Vector{Vector{BEAST.Shape{T}}}(undef,0)
     append!(totalfns,X.fns)
-    append!(totalfns,Y.fns[1:end-1])
-    append!(totalfns,Z.fns[1:end-1])
+    #append!(totalfns,Y.fns[1:end-1])
+    #append!(totalfns,Z.fns[1:end-1])
     globalfn = append!(Y.fns[end],Z.fns[end])
     append!(totalfns,[globalfn])
 
 
     totalpos = Vector{vertextype(dev_mesh)}(undef,0)
     append!(totalpos,X.pos)
-    append!(totalpos,Y.pos[1:end-1])
-    append!(totalpos,Z.pos[1:end-1])
+    #append!(totalpos,Y.pos[1:end-1])
+    #append!(totalpos,Z.pos[1:end-1])
     globalfnpos = (Y.pos[end]+Z.pos[end])/2
     append!(totalpos,[globalfnpos])
 
     ids_internals = fill(1, numfunctions(X))
-    ids_emitters = fill(2, numfunctions(Y)-1)
-    ids_collectors = fill(3, numfunctions(Z)-1)
+    #ids_emitters = fill(2, numfunctions(Y)-1)
+    #ids_collectors = fill(3, numfunctions(Z)-1)
     ids_global = fill(4,1)
 
-    return RTBasis(X.geo,totalfns,totalpos), vcat(ids_internals,ids_emitters,ids_collectors,ids_global)
+    #return RTBasis(X.geo,totalfns,totalpos), vcat(ids_internals,ids_emitters,ids_collectors,ids_global)
+    return RTBasis(X.geo,totalfns,totalpos), vcat(ids_internals,ids_global)
 end

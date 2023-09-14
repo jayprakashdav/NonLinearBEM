@@ -103,8 +103,32 @@ end
 
 function (f::PortVolt)(r,t)
     t = cartesian(t)[1]
-    f.pv1(t)*[1.0 1.0 1.0]
+    f.pv1(t)
 end
+
+function timeintegrals!(z, exc::NonLinearBEM.PortVolt,
+    spacerefs, timerefs::BEAST.DiracBoundary,
+    testpoint, timeelement,
+    dx, qr, testvals)
+
+    # since timeelement uses barycentric coordinates,
+    # the first/left vertex has coords u = 1.0!
+    testtime = neighborhood(timeelement, point(0.0))
+    @assert cartesian(testtime)[1] ≈ timeelement.vertices[2][1]
+
+    for i in 1 : numfunctions(spacerefs)
+        z[i,1] += (dot(testvals[i][1], testvals[i][1])/(norm(testvals[i][1])))*exc(testpoint, testtime)* dx
+    end
+    #println("enter in NonLinearBEM package")
+end
+
+BEAST.timeintegrals!(z, exc::NonLinearBEM.PortVolt,
+spacerefs, timerefs::BEAST.DiracBoundary,
+testpoint, timeelement,
+dx, qr, testvals) = NonLinearBEM.timeintegrals!(z, exc::NonLinearBEM.PortVolt,
+spacerefs, timerefs::BEAST.DiracBoundary,
+testpoint, timeelement,
+dx, qr, testvals)
 
 BEAST.assemble!(exc::PortVolt, testST, store;
 quaddata=quaddata, quadrule=quadrule) = NonLinearBEM.assemble!(exc::PortVolt, testST, store;
@@ -153,7 +177,8 @@ function assemble!(exc::PortVolt, testST, store;
 end
 
 BEAST.integrand(::NonLinearBEM.ConductivityTD_model, gx, ϕx) = gx[1] ⋅ ϕx
-BEAST.defaultquadstrat(::NonLinearBEM.ConductivityTD_model, ::BEAST.LinearRefSpaceTriangle, ::BEAST.LinearRefSpaceTriangle) = BEAST.SingleNumQStrat(8)
+BEAST.defaultquadstrat(::NonLinearBEM.ConductivityTD_model, ::BEAST.LinearRefSpaceTriangle, ::BEAST.LinearRefSpaceTriangle) = BEAST.SingleNumQStrat(9)
+BEAST.defaultquadstrat(::NonLinearBEM.ConductivityTD_model, ::BEAST.Space) = BEAST.SingleNumQStrat(9)
 
 BEAST.quaddata(exc::NonLinearBEM.ConductivityTD_model, g::BEAST.LinearRefSpaceTriangle, f::BEAST.LinearRefSpaceTriangle, tels, bels,
 qs::BEAST.SingleNumQStrat) = 

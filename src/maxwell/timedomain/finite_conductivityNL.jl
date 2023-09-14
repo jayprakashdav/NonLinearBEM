@@ -138,6 +138,7 @@ function quadpoint_field(biop::ConductivityTD_model, coeffs, k, tfs, bfs;
     btcell = btels[k]
     for (p,bcell) in enumerate(bels)   
         qr = BEAST.quadrule(biop, trefs, brefs, bcell, qd, quadstrat)
+        #println(length(qr))
         for (qi,qdpt) in enumerate(qr)
             mp = carttobary(bcell, qdpt[2])
             vals = brefs(neighborhood(bcell, mp))
@@ -664,7 +665,7 @@ function marchonintimenl6(eq1, eq2,  Z, inc, Ġ, G_j, G_nl, Nt)
     padrow2e = zeros(T, N+Ne)'
     padcol2[N] = -1.0
     padrow1e[N] = 1.0
-    res= 0.1
+    res= 500.0
     padmat = [1.0 0.0; res/Δt 1.0]
     V0[1:N, 1:N] = Z0
     V0[1:N, N+1:N+Ne] = -Ġ0
@@ -699,11 +700,8 @@ function marchonintimenl6(eq1, eq2,  Z, inc, Ġ, G_j, G_nl, Nt)
     for i in 1:Nt
         println(i)
         R = inc[:,i]
-        vi = R[end]
+        vi = eq1.equation.rhs.terms[1].functional.pv1(i*Δt)
         R[end] = 0.0
-        ##do a clean implementation
-        #= g = BEAST.creategaussian(2.9504, 2.2128, 0.8)
-        R[end] = g(0.01844*i) =#
 		fill!(yj,0)
 		fill!(ye,0)
 		BEAST.ConvolutionOperators.convolve!(yj,Z,xj,csxj,i,jk_start,jk_stop)
@@ -759,6 +757,7 @@ end
 #in marchonintime7, the circuit is complicated to include an inductor and a capacitor to drive the 
 #circuit in oscillations
 function marchonintimenl7(eq1, eq2,  Z, inc, Ġ, G_j, G_nl, Nt)
+    println("tank circuit added")
     T = eltype(Z)
     Z0 = zeros(T, size(Z)[1:2])
     BEAST.ConvolutionOperators.timeslice!(Z0,Z,1)
@@ -776,11 +775,11 @@ function marchonintimenl7(eq1, eq2,  Z, inc, Ġ, G_j, G_nl, Nt)
     padcol2 = zeros(T, N+Ne)
     padrow1e = zeros(T, N+Ne)'# this computes the adjoint and not just the transpose, practice caution when complex matrix elements are involved
     padrow2e = zeros(T, N+Ne)'
-    padcol2[N] = 1.0
-    padrow1e[N] = -1.0
-    res= 0.01
-    L = 25e-2
-    C = 25e-3
+    padcol2[N] = -1.0
+    padrow1e[N] = 1.0
+    res= 0.01e-10
+    L = 25e-3
+    C = 25e-5
     padmat = [1.0 -1.0*C; ((L/(Δt)^2)+res/Δt) 1.0]
     V0[1:N, 1:N] = Z0
     V0[1:N, N+1:N+Ne] = -Ġ0
@@ -815,7 +814,7 @@ function marchonintimenl7(eq1, eq2,  Z, inc, Ġ, G_j, G_nl, Nt)
     for i in 1:Nt
         println(i)
         R = inc[:,i]
-        vi = R[end]
+        vi = eq1.equation.rhs.terms[1].functional.pv1(i*Δt)
         R[end] = 0.0
         ##do a clean implementation
         #= g = BEAST.creategaussian(2.9504, 2.2128, 0.8)
