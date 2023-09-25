@@ -775,11 +775,11 @@ function marchonintimenl7(eq1, eq2,  Z, inc, Ġ, G_j, G_nl, Nt)
     padcol2 = zeros(T, N+Ne)
     padrow1e = zeros(T, N+Ne)'# this computes the adjoint and not just the transpose, practice caution when complex matrix elements are involved
     padrow2e = zeros(T, N+Ne)'
-    padcol2[N] = -1.0
-    padrow1e[N] = 1.0
-    res= 0.01e-10
-    L = 25e-3
-    C = 25e-5
+    padcol2[N] = 1.0
+    padrow1e[N] = -1.0
+    res= 0.001
+    L = 0
+    C = 0
     padmat = [1.0 -1.0*C; ((L/(Δt)^2)+res/Δt) 1.0]
     V0[1:N, 1:N] = Z0
     V0[1:N, N+1:N+Ne] = -Ġ0

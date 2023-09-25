@@ -94,3 +94,37 @@ function raviartthomaswithport(dev_mesh::CompScienceMeshes.AbstractMesh{U,D1,T},
     #return RTBasis(X.geo,totalfns,totalpos), vcat(ids_internals,ids_emitters,ids_collectors,ids_global)
     return RTBasis(X.geo,totalfns,totalpos), vcat(ids_internals,ids_global)
 end
+
+#with 2 global basis functions
+function raviartthomaswithport2(dev_mesh::CompScienceMeshes.AbstractMesh{U,D1,T}, port1mesh::CompScienceMeshes.AbstractMesh{U,D2,T}, port2mesh::CompScienceMeshes.AbstractMesh{U,D3,T}) where{U,D1,D2,D3,T}
+    outward = 1.0
+    inward = -1.0
+    X = raviartthomas(dev_mesh)
+    Y = raviartthomaswithport(dev_mesh, port1mesh, outward)
+    Z = raviartthomaswithport(dev_mesh, port2mesh, inward)
+    
+    totalfns = Vector{Vector{BEAST.Shape{T}}}(undef,0)
+    append!(totalfns,X.fns)
+    #append!(totalfns,Y.fns[1:end-1])
+    #append!(totalfns,Z.fns[1:end-1])
+    #globalfn = append!(Y.fns[end],Z.fns[end])
+    append!(totalfns,[Y.fns[end]])
+    append!(totalfns,[Z.fns[end]])
+
+
+    totalpos = Vector{vertextype(dev_mesh)}(undef,0)
+    append!(totalpos,X.pos)
+    #append!(totalpos,Y.pos[1:end-1])
+    #append!(totalpos,Z.pos[1:end-1])
+    globalfnpos = (Y.pos[end]+Z.pos[end])/2
+    append!(totalpos,[Y.pos[end]/2])
+    append!(totalpos,[Z.pos[end]/2])
+
+    ids_internals = fill(1, numfunctions(X))
+    #ids_emitters = fill(2, numfunctions(Y)-1)
+    #ids_collectors = fill(3, numfunctions(Z)-1)
+    ids_global = fill(4,2)
+
+    #return RTBasis(X.geo,totalfns,totalpos), vcat(ids_internals,ids_emitters,ids_collectors,ids_global)
+    return RTBasis(X.geo,totalfns,totalpos), vcat(ids_internals,ids_global)
+end
