@@ -17,7 +17,7 @@ import BEAST.td_assemble
 export IdentityTime
 export NLConductivity
 export ConductivityTD
-export raviartthomaswithport
+export raviartthomaswithport, raviartthomaswithport2
 export PortVolt
 
 include("bases/portvoltage.jl")
