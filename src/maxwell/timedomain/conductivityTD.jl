@@ -97,8 +97,12 @@ function (f::ConductivityTD_b)(cell, cqdpt, mp)
             λ = 0.0
         end
     end =#
-    fn = (λ*f.chr(norm(ei))+(1-λ)*1.0)*ei
-    return fn
+    #= if (mp.cart[3]>0.02) & (mp.cart[3]<0.04)
+        return 3.0*ei
+    end =#
+    λ = erf(abs(mp.cart[3])/0.1)
+    fn = ((1-λ)*f.chr(norm(ei))+(λ)*4.0)
+    return fn*ei
 end
 
 function (f::PortVolt)(r,t)
@@ -177,8 +181,8 @@ function assemble!(exc::PortVolt, testST, store;
 end
 
 BEAST.integrand(::NonLinearBEM.ConductivityTD_model, gx, ϕx) = gx[1] ⋅ ϕx
-BEAST.defaultquadstrat(::NonLinearBEM.ConductivityTD_model, ::BEAST.LinearRefSpaceTriangle, ::BEAST.LinearRefSpaceTriangle) = BEAST.SingleNumQStrat(9)
-BEAST.defaultquadstrat(::NonLinearBEM.ConductivityTD_model, ::BEAST.Space) = BEAST.SingleNumQStrat(9)
+BEAST.defaultquadstrat(::NonLinearBEM.ConductivityTD_model, ::BEAST.LinearRefSpaceTriangle, ::BEAST.LinearRefSpaceTriangle) = BEAST.SingleNumQStrat(10)
+BEAST.defaultquadstrat(::NonLinearBEM.ConductivityTD_model, ::BEAST.Space) = BEAST.SingleNumQStrat(10)
 
 BEAST.quaddata(exc::NonLinearBEM.ConductivityTD_model, g::BEAST.LinearRefSpaceTriangle, f::BEAST.LinearRefSpaceTriangle, tels, bels,
 qs::BEAST.SingleNumQStrat) = 

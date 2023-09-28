@@ -1,7 +1,7 @@
 module NonLinearBEM
 
 using BEAST, CompScienceMeshes, LinearAlgebra
-using StaticArrays
+using StaticArrays, SpecialFunctions
 
 import BEAST.LocalOperator, BEAST.Functional
 import BEAST.SpaceTimeBasis
