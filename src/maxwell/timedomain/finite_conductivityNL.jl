@@ -414,61 +414,69 @@ function marchonintimenl4(eq1, eq2,  Z, inc, Ġ, G_j, G_nl, Nt)
     #G_nl_inv = inv(Matrix(G_nl0))
     #G_j0_inv = inv(Matrix(G_j0))
     println(Nt)
-    for i in 1:Nt
-        println(i)
-        R = inc[:,i]
-        ##do a clean implementation
-        #= g = BEAST.creategaussian(2.9504, 2.2128, 0.8)
-        R[end] = g(0.01844*i) =#
-		fill!(yj,0)
-		fill!(ye,0)
-		BEAST.ConvolutionOperators.convolve!(yj,Z,xj,csxj,i,jk_start,jk_stop)
-        BEAST.ConvolutionOperators.convolve!(ye,Ġ,xe,csxe,i,ek_start,ek_stop)
-        iter_max = 200
-        for l in 1:iter_max
-            if l==1
-                if i==1
-                    i=2
+    try
+        for i in 1:Nt
+            println(i)
+            R = inc[:,i]
+            ##do a clean implementation
+            #= g = BEAST.creategaussian(2.9504, 2.2128, 0.8)
+            R[end] = g(0.01844*i) =#
+            fill!(yj,0)
+            fill!(ye,0)
+            BEAST.ConvolutionOperators.convolve!(yj,Z,xj,csxj,i,jk_start,jk_stop)
+            BEAST.ConvolutionOperators.convolve!(ye,Ġ,xe,csxe,i,ek_start,ek_stop)
+            iter_max = 200
+            for l in 1:iter_max
+                if l==1
+                    if i==1
+                        i=2
+                    end
+                    xeprev = xe[:,i-1]
+                    update!(σ, xj, xe, i-1, eq1, eq2)
+                else
+                    xeprev = xe[:,i]
+                    update!(σ, xj, xe, i, eq1, eq2)
                 end
-                xeprev = xe[:,i-1]
-                update!(σ, xj, xe, i-1, eq1, eq2)
+                bσ = BEAST.assemble(σ, eq2.test_space_dict[1].space)
+                Q = BEAST.assemble(σop, eq2.test_space_dict[1].space, eq2.trial_space_dict[1].space)
+                #Q_inv = inv(Matrix(Q))
+                #= println("normQ ", norm(Q))
+                println("normbsigma ", norm(bσ)) =#
+                #V0 = inv(Z0*G_j0_inv*Q - Ġ0)
+                V0[N+1:N+Ne,N+1:N+Ne] = -Q
+                rhs1 = R - yj + ye
+                rhs2 = bσ - Q*xeprev
+                #b = rhs1 + rhs2         #solve |Z   -Ġ|J =|b|                     
+                b = [rhs1; rhs2]
+                sol = inv(Matrix(V0))*b
+                #= invV0 = GMRESSolver(V0, maxiter=1000, restart=0, tol=1e-6)
+                mul!(sol, invV0, b) =#
+                xj[:,i] = sol[1:N]                            #|G_j  Q|E =|0|
+                xe[:,i] = sol[N+1:end]
+                #xe_all = hcat(xe_all, xe[:,i])
+                #xj_all = hcat(xj_all, xj[:,i])
+                #= println("norm xe ", norm(xe[:,i]-xeprev)/M)
+                if norm(xe[:,i]-xeprev)/M < 1e-7
+                    break
+                end =#
+                println("L_inf norm xe ", maximum(abs.((xe[:,i]-xeprev))))
+                if maximum(abs.((xe[:,i]-xeprev)))/M < 1e-10
+                    break
+                end
+            end
+            if i > 1
+                csxj[:,i] .= csxj[:,i-1] .+ xj[:,i]
+                csxe[:,i] .= csxe[:,i-1] .+ xe[:,i]
             else
-                xeprev = xe[:,i]
-                update!(σ, xj, xe, i, eq1, eq2)
+                csxj[:,i] .= xj[:,i]
+                csxe[:,i] .= xe[:,i]
             end
-            bσ = BEAST.assemble(σ, eq2.test_space_dict[1].space)
-            Q = BEAST.assemble(σop, eq2.test_space_dict[1].space, eq2.trial_space_dict[1].space)
-            #Q_inv = inv(Matrix(Q))
-            #= println("normQ ", norm(Q))
-            println("normbsigma ", norm(bσ)) =#
-            #V0 = inv(Z0*G_j0_inv*Q - Ġ0)
-            V0[N+1:N+Ne,N+1:N+Ne] = -Q
-            rhs1 = R - yj + ye
-            rhs2 = bσ - Q*xeprev
-            #b = rhs1 + rhs2         #solve |Z   -Ġ|J =|b|                     
-            b = [rhs1; rhs2]
-            sol = inv(Matrix(V0))*b
-            #= invV0 = GMRESSolver(V0, maxiter=1000, restart=0, tol=1e-6)
-            mul!(sol, invV0, b) =#
-            xj[:,i] = sol[1:N]                            #|G_j  Q|E =|0|
-            xe[:,i] = sol[N+1:end]
-            #xe_all = hcat(xe_all, xe[:,i])
-            #xj_all = hcat(xj_all, xj[:,i])
-            println("norm xe ", norm(xe[:,i]-xeprev))
-            if norm(xe[:,i]-xeprev) < 1e-4
-                break
-            end
+            (i % 10 == 0) && print(i, "[", Nt, "] - ")
         end
-        if i > 1
-            csxj[:,i] .= csxj[:,i-1] .+ xj[:,i]
-            csxe[:,i] .= csxe[:,i-1] .+ xe[:,i]
-        else
-            csxj[:,i] .= xj[:,i]
-            csxe[:,i] .= xe[:,i]
-        end
-        (i % 10 == 0) && print(i, "[", Nt, "] - ")
+        return xj, xe, xj_all, xe_all
+    catch e
+        return xj, xe, xj_all, xe_all
     end
-    return xj, xe, xj_all, xe_all
 end
 
 #initial condition implementation
