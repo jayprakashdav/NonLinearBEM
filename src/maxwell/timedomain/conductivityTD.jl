@@ -85,7 +85,7 @@ function (f::ConductivityTD_b)(cell, cqdpt, mp)
     λ = 1.0
     margin = 0.2
     marginh = 0.5-margin
-    xmp = mp.cart[1]-0.5
+    xmp = mp.cart[1]
     ymp = mp.cart[2]-0.5
     #nearedge = false
     r = sqrt(xmp^2+ymp^2)
@@ -100,8 +100,9 @@ function (f::ConductivityTD_b)(cell, cqdpt, mp)
     #= if (mp.cart[3]>0.02) & (mp.cart[3]<0.04)
         return 3.0*ei
     end =#
-    λ = erf(abs(mp.cart[3])/0.1)
-    fn = ((1-λ)*f.chr(norm(ei))+(λ)*4.0)
+    #λ = erf(abs(mp.cart[3])/0.1)
+    #fn = ((1-λ)*f.chr(norm(ei))+(λ)*4.0)
+    fn = f.chr(norm(ei))
     return fn*ei
 end
 

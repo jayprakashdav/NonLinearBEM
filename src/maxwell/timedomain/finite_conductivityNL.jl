@@ -785,7 +785,7 @@ function marchonintimenl7(eq1, eq2,  Z, inc, Ġ, G_j, G_nl, Nt)
     padrow2e = zeros(T, N+Ne)'
     padcol2[N] = 1.0
     padrow1e[N] = -1.0
-    res= 0.001
+    res= 0.0
     L = 0
     C = 0
     padmat = [1.0 -1.0*C; ((L/(Δt)^2)+res/Δt) 1.0]
